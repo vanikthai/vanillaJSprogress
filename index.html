@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>file upload</title>
+  </head>
+  <body>
+    <input type="file" id="f" />
+    <div id="divOutput"></div>
+    <button id="btn">upload</button>
+  </body>
+  <script>
+    const btn = document.getElementById("btn");
+    const output = document.getElementById("divOutput");
+    const f = document.getElementById("f");
+
+    btn.addEventListener("click", () => {
+      const fread = new FileReader();
+      const file = f.files[0];
+      fread.onload = async (ev) => {
+        const CHANK_SIZE = 1000;
+        const chankCount = ev.target.result.byteLength / CHANK_SIZE;
+        const filename = Math.random() * 100 + file.name;
+        for (let chankId = 0; chankId < chankCount; chankId++) {
+          const chauk = ev.target.result.slice(
+            chankId * CHANK_SIZE,
+            chankId * CHANK_SIZE + CHANK_SIZE
+          );
+
+          await fetch("http://localhost:3000/upload", {
+            method: "POST",
+            headers: {
+              "content-type": "application/octec-stream",
+              "content-length": chauk.length,
+              "file-name": filename,
+            },
+            body: chauk,
+          });
+          output.textContent = Math.round((chankId * 100) / chankCount, 0);
+        }
+      };
+
+      fread.readAsArrayBuffer(file);
+    });
+  </script>
+</html>
