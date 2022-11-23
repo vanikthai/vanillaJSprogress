@@ -70,7 +70,7 @@
                           <i class="fas fa-file-alt"></i>
                           <div class="content">
                             <div class="details">
-                              <span class="name">${filename} • Uploading</span>
+                              <span class="name">${filename} • process</span>
                               <span class="percent">${fileLoaded}%</span>
                             </div>
                             <div class="progress-bar">
@@ -78,13 +78,13 @@
                             </div>
                           </div>
                         </li>`;
-            uploadedArea.innerHTML = ""; //uncomment this line if you don't want to show upload history
+            // uploadedArea.innerHTML = ""; //uncomment this line if you don't want to show upload history
             uploadedArea.classList.add("onprogress");
             progressArea.innerHTML = progressHTML;
-
-            if (fileLoaded == 100) {
-              progressArea.innerHTML = "";
-              let uploadedHTML = `<li class="row">
+          }
+          //  if (fileLoaded == 100) {
+          progressArea.innerHTML = "";
+          let uploadedHTML = `<li class="row">
                             <div class="content upload">
                               <i class="fas fa-file-alt"></i>
                               <div class="details">
@@ -94,11 +94,10 @@
                             </div>
                             <i class="fas fa-check"></i>
                           </li>`;
-              uploadedArea.classList.remove("onprogress");
-              uploadedArea.innerHTML = uploadedHTML; //uncomment this line if you don't want to show upload history
-              // uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML); //remove this line if you don't want to show upload history
-            }
-          }
+          uploadedArea.classList.remove("onprogress");
+          uploadedArea.innerHTML = uploadedHTML; //uncomment this line if you don't want to show upload history
+          // uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML); //remove this line if you don't want to show upload history
+          // }
         };
 
         fread.readAsArrayBuffer(file);
