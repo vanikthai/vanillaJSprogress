@@ -1,48 +1,235 @@
 <!DOCTYPE html>
+<!-- Coding By CodingNepal - youtube.com/codingnepal -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>file upload</title>
+    <title>File Upload with Progress Bar | CodingNepal</title>
+    <!-- <link rel="stylesheet" href="./style.css" /> -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
   </head>
   <body>
-    <input type="file" id="f" />
-    <div id="divOutput"></div>
-    <button id="btn">upload</button>
-  </body>
-  <script>
-    const btn = document.getElementById("btn");
-    const output = document.getElementById("divOutput");
-    const f = document.getElementById("f");
+    <div class="wrapper">
+      <header>File Uploader JavaScript</header>
+      <form action="#">
+        <input class="file-input" type="file" name="file" hidden />
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Browse File to Upload</p>
+      </form>
+      <section class="progress-area"></section>
+      <section class="uploaded-area"></section>
+    </div>
 
-    btn.addEventListener("click", () => {
-      const fread = new FileReader();
-      const file = f.files[0];
-      fread.onload = async (ev) => {
-        const CHANK_SIZE = 1000;
-        const chankCount = ev.target.result.byteLength / CHANK_SIZE;
-        const filename = Math.random() * 100 + file.name;
-        for (let chankId = 0; chankId < chankCount; chankId++) {
-          const chauk = ev.target.result.slice(
-            chankId * CHANK_SIZE,
-            chankId * CHANK_SIZE + CHANK_SIZE
-          );
+    <script>
+      const form = document.querySelector("form"),
+        fileInput = document.querySelector(".file-input"),
+        progressArea = document.querySelector(".progress-area"),
+        uploadedArea = document.querySelector(".uploaded-area");
+      ////////////////////////////////////////////////////////////////////////
 
-          await fetch("http://localhost:3000/upload", {
-            method: "POST",
-            headers: {
-              "content-type": "application/octec-stream",
-              "content-length": chauk.length,
-              "file-name": filename,
-            },
-            body: chauk,
-          });
-          output.textContent = Math.round((chankId * 100) / chankCount, 0);
-        }
+      // form click event
+      form.addEventListener("click", () => {
+        fileInput.click();
+      });
+
+      fileInput.onchange = ({ target }) => {
+        let file = target.files[0]; //getting file [0] this means if user has selected multiple files then get first one only
+        uploadFile(file); //calling uploadFile with passing file name as an argument
       };
 
-      fread.readAsArrayBuffer(file);
-    });
-  </script>
+      // file upload function
+      function uploadFile(file) {
+        const fread = new FileReader();
+        fread.onload = async (ev) => {
+          const CHANK_SIZE = 1000;
+          const chankCount = ev.target.result.byteLength / CHANK_SIZE;
+          const filename = file.name;
+          const fname = file.name.split(".");
+          const newname = Math.random() * 100 + "." + fname[fname.length - 1];
+
+          for (let chankId = 0; chankId < chankCount; chankId++) {
+            const chauk = ev.target.result.slice(
+              chankId * CHANK_SIZE,
+              chankId * CHANK_SIZE + CHANK_SIZE
+            );
+
+            await fetch("http://localhost:3000/upload", {
+              method: "POST",
+              headers: {
+                "content-type": "application/octec-stream",
+                "content-length": chauk.length,
+                "file-name": newname,
+              },
+              body: chauk,
+            });
+            let fileLoaded = Math.round((chankId * 100) / chankCount, 0);
+            let progressHTML = `<li class="row">
+                          <i class="fas fa-file-alt"></i>
+                          <div class="content">
+                            <div class="details">
+                              <span class="name">${filename} • Uploading</span>
+                              <span class="percent">${fileLoaded}%</span>
+                            </div>
+                            <div class="progress-bar">
+                              <div class="progress" style="width: ${fileLoaded}%"></div>
+                            </div>
+                          </div>
+                        </li>`;
+            uploadedArea.innerHTML = ""; //uncomment this line if you don't want to show upload history
+            uploadedArea.classList.add("onprogress");
+            progressArea.innerHTML = progressHTML;
+
+            if (fileLoaded == 100) {
+              progressArea.innerHTML = "";
+              let uploadedHTML = `<li class="row">
+                            <div class="content upload">
+                              <i class="fas fa-file-alt"></i>
+                              <div class="details">
+                                <span class="name">${filename} • Uploaded</span>
+                                <span class="size">${chankCount}</span>
+                              </div>
+                            </div>
+                            <i class="fas fa-check"></i>
+                          </li>`;
+              uploadedArea.classList.remove("onprogress");
+              uploadedArea.innerHTML = uploadedHTML; //uncomment this line if you don't want to show upload history
+              // uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML); //remove this line if you don't want to show upload history
+            }
+          }
+        };
+
+        fread.readAsArrayBuffer(file);
+
+        let data = new FormData(form); //FormData is an object to easily send form data
+        // xhr.send(data); //sending form data
+      }
+    </script>
+  </body>
+
+  <style>
+    /* Import Google font - Poppins */
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #6990f2;
+    }
+
+    ::selection {
+      color: #fff;
+      background: #6990f2;
+    }
+    .wrapper {
+      width: 430px;
+      background: #fff;
+      border-radius: 5px;
+      padding: 30px;
+      box-shadow: 7px 7px 12px rgba(0, 0, 0, 0.05);
+    }
+    .wrapper header {
+      color: #6990f2;
+      font-size: 27px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .wrapper form {
+      height: 167px;
+      display: flex;
+      cursor: pointer;
+      margin: 30px 0;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      border-radius: 5px;
+      border: 2px dashed #6990f2;
+    }
+    form :where(i, p) {
+      color: #6990f2;
+    }
+    form i {
+      font-size: 50px;
+    }
+    form p {
+      margin-top: 15px;
+      font-size: 16px;
+    }
+
+    section .row {
+      margin-bottom: 10px;
+      background: #e9f0ff;
+      list-style: none;
+      padding: 15px 20px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    section .row i {
+      color: #6990f2;
+      font-size: 30px;
+    }
+    section .details span {
+      font-size: 14px;
+    }
+    .progress-area .row .content {
+      width: 100%;
+      margin-left: 15px;
+    }
+    .progress-area .details {
+      display: flex;
+      align-items: center;
+      margin-bottom: 7px;
+      justify-content: space-between;
+    }
+    .progress-area .content .progress-bar {
+      height: 6px;
+      width: 100%;
+      margin-bottom: 4px;
+      background: #fff;
+      border-radius: 30px;
+    }
+    .content .progress-bar .progress {
+      height: 100%;
+      width: 0%;
+      background: #6990f2;
+      border-radius: inherit;
+    }
+    .uploaded-area {
+      max-height: 232px;
+      overflow-y: scroll;
+    }
+    .uploaded-area.onprogress {
+      max-height: 150px;
+    }
+    .uploaded-area::-webkit-scrollbar {
+      width: 0px;
+    }
+    .uploaded-area .row .content {
+      display: flex;
+      align-items: center;
+    }
+    .uploaded-area .row .details {
+      display: flex;
+      margin-left: 15px;
+      flex-direction: column;
+    }
+    .uploaded-area .row .details .size {
+      color: #404040;
+      font-size: 11px;
+    }
+    .uploaded-area i.fa-check {
+      font-size: 16px;
+    }
+  </style>
 </html>

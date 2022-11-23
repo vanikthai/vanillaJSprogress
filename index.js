@@ -1,11 +1,14 @@
 const http = require("http");
-const server = http.createServer();
 const fs = require("fs");
+const app = http.createServer();
 const path = require("path");
 
 const part_donload = path.join(__dirname, "download");
 
-server.on("request", (req, res) => {
+app.on("listening", () => {
+  console.log("http://localhost:3000");
+});
+app.on("request", (req, res) => {
   if (req.url === "/") {
     res.end(fs.readFileSync("index.html"));
     return;
@@ -20,8 +23,4 @@ server.on("request", (req, res) => {
     res.end("uploaded!!");
   }
 });
-
-server.on("listening", () => {
-  console.log("http://localhost:3000");
-});
-server.listen(3000);
+app.listen(3000);
